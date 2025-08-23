@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "commit.h": "c"
+        "commit.h": "c",
+        "stdlib.h": "c"
     }
 }
