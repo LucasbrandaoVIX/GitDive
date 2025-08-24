@@ -41,4 +41,34 @@ void insert_item(List* list, void* data){
         list->last = node;
     }
     
+    list->items_num++;
 }
+
+
+void print_list(List* list, void (*print_function)(void*)){
+    Node* node = list->first;
+    while (node != NULL){
+        
+        print_function(node->data);
+        
+        node = node->next;
+    }
+
+}
+
+
+void* traverse_list(List* list, void* (*callback_function)(void*)){
+    Node* node = list->first;
+    while (node != NULL){
+        
+        void* v = callback_function(node->data);
+        if(v){
+            return v;
+        }
+        
+        node = node->next;
+    }
+    
+    return NULL;
+}
+

@@ -1,6 +1,7 @@
 #include "commit.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 struct Commit{
 
     int id;
@@ -18,16 +19,16 @@ struct Author{
 
 struct Modification {
 
-    char filepath[256];           // Arquivo onde ocorreu a modificação
-    char old_code[1024];         // Código original (antes da modificação)
-    char new_code[1024];         // Código novo (após a modificação)
-    int start_line;              // Linha onde o bloco começa
+    char filepath[256];           
+    char old_code[1024];      
+    char new_code[1024];    
+    int start_line;   
 };
 
-
-Commit* initialize_commit(Author* author, List* modifications, char* message){
+Commit* initialize_commit(int commit_id, Author* author, List* modifications, char* message){
     Commit* commit = malloc(sizeof(Commit));
     if (!commit) return NULL;
+    commit->id = commit_id;
     commit->author = author;
     strcpy(commit->message, message);
     commit->modifications = modifications;
@@ -54,4 +55,37 @@ Author* initialize_author(int author_id, char* name){
     return author;
 }
 
+void print_mod(Modification* mod){
+    if (mod == NULL) {
+        printf("Modification is NULL\n");
+        return;
+    }
+    
+    printf("=== Modification Details ===\n");
+    printf("File Path: %s\n", mod->filepath);
+    printf("Start Line: %d\n", mod->start_line);
+    printf("Old Code: %s\n", mod->old_code);
+    printf("New Code: %s\n", mod->new_code);
+    printf("============================\n");
+}
 
+void print_commit(Commit* commit){
+    if (commit == NULL) {
+        printf("Commit is NULL\n");
+        return;
+    }
+    
+    printf("\n======= COMMIT =======\n");
+    printf("Commit ID: %d\n", commit->id);
+    printf("Author: %s (ID: %d)\n", commit->author->name, commit->author->author_id);
+    printf("Message: %s\n", commit->message);
+    printf("Modifications:\n");
+    
+    if (commit->modifications != NULL) {
+        print_list(commit->modifications, (void (*)(void*))print_mod);
+    } else {
+        printf("No modifications\n");
+    }
+    
+    printf("=====================\n\n");
+}
