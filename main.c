@@ -2,72 +2,32 @@
 #include <stdio.h>
 #include "list.h"
 #include "commit.h"
+#include "git_local.h"
 
 int main(){
-
-    // Create a list to hold commits
-    List* commit_list = initialize_list();
+    printf("GitDive - Real Git Repository Analysis\n");
+    printf("======================================\n\n");
     
-    // Create first author
-    Author* author1 = initialize_author(1, "lucas");
+    // Get real commits from the local git repository
+    printf("Fetching commits from local git repository...\n");
+    List* commit_list = get_git_commits(10); // Get last 10 commits
     
-    // First commit with modifications
-    List* mod_list1 = initialize_list();
+    if (commit_list == NULL) {
+        printf("Error: Could not retrieve commits from git repository.\n");
+        printf("Please ensure:\n");
+        printf("1. You are in a git repository\n");
+        printf("2. Git is installed and available in PATH\n");
+        printf("3. The repository has commits\n");
+        return 1;
+    }
     
-    char* filepath1 = "this/is/the/path";
-    char* old_code1 = "print(hello world)";
-    char* new_code1 = "print('hello world!!')// fixed message";
-    int start_line1 = 5;
-    
-    Modification* mod1 = initialize_modification(filepath1, old_code1, new_code1, start_line1);
-    insert_item(mod_list1, mod1);
-
-    char* filepath2 = "this/is/the/path2";
-    char* old_code2 = "int x = 8.";
-    char* new_code2 = "int x = 8; // fixed ;";
-    int start_line2 = 3;
-    
-    Modification* mod2 = initialize_modification(filepath2, old_code2, new_code2, start_line2);
-    insert_item(mod_list1, mod2);
-
-    Commit* commit1 = initialize_commit(1, author1, mod_list1, "First commit: Fixed print statement and semicolon");
-    insert_item(commit_list, commit1);
-
-    // Create second author
-    Author* author2 = initialize_author(2, "maria");
-    
-    // Second commit with different modifications
-    List* mod_list2 = initialize_list();
-    
-    char* filepath3 = "src/utils.c";
-    char* old_code3 = "return null;";
-    char* new_code3 = "return NULL; // fixed case";
-    int start_line3 = 15;
-    
-    Modification* mod3 = initialize_modification(filepath3, old_code3, new_code3, start_line3);
-    insert_item(mod_list2, mod3);
-
-    Commit* commit2 = initialize_commit(2, author2, mod_list2, "Second commit: Fixed NULL case sensitivity");
-    insert_item(commit_list, commit2);
-
-    // Third commit by first author
-    List* mod_list3 = initialize_list();
-    
-    char* filepath4 = "main.c";
-    char* old_code4 = "#include <stdio.h>";
-    char* new_code4 = "#include <stdio.h>\n#include <stdlib.h> // added stdlib";
-    int start_line4 = 1;
-    
-    Modification* mod4 = initialize_modification(filepath4, old_code4, new_code4, start_line4);
-    insert_item(mod_list3, mod4);
-
-    Commit* commit3 = initialize_commit(3, author1, mod_list3, "Third commit: Added stdlib include");
-    insert_item(commit_list, commit3);
-
-    // Print the entire commit list
-    printf("========== COMMIT HISTORY ==========\n");
+    // Print the entire commit list with real git data
+    printf("========== REAL COMMIT HISTORY ==========\n");
     print_list(commit_list, (void (*)(void*))print_commit);
-    printf("====================================\n");
-
+    printf("=========================================\n");
+    
+    // Clean up
+    cleanup_git_data();
+    
     return 0;
 }
