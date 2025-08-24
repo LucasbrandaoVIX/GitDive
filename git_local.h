@@ -1,31 +1,41 @@
 #ifndef GIT_LOCAL_H
 #define GIT_LOCAL_H
 
-#include "commit.h"
 #include "list.h"
+#include "commit.h"
+#include <stddef.h>
 
-// Function to get commits from local git repository
+/**
+ * Get commits from the local git repository
+ * @param max_commits Maximum number of commits to retrieve (0 for all)
+ * @return List of Commit* objects, or NULL on error
+ */
 List* get_git_commits(int max_commits);
 
-// Function to get commit details by hash
-Commit* get_commit_by_hash(const char* commit_hash, int commit_id);
+/**
+ * Get detailed diff information for a specific commit
+ * @param commit_hash The commit hash to get diff for
+ * @return List of Modification* objects, or NULL on error
+ */
+List* get_commit_diff(const char* commit_hash);
 
-// Function to get modifications for a specific commit
-List* get_commit_modifications(const char* commit_hash);
+/**
+ * Check if current directory is a git repository
+ * @return 1 if git repo, 0 otherwise
+ */
+int is_git_repository();
 
-// Helper function to execute git commands and capture output
-char* execute_git_command(const char* command);
+/**
+ * Get the current repository root path
+ * @param buffer Buffer to store the path
+ * @param buffer_size Size of the buffer
+ * @return 1 on success, 0 on error
+ */
+int get_git_root(char* buffer, size_t buffer_size);
 
-// Function to parse git log output into commits
-List* parse_git_log(const char* git_log_output);
-
-// Function to parse git show output for modifications
-List* parse_git_show(const char* git_show_output);
-
-// Function to extract author information from git log line
-Author* parse_author_from_line(const char* author_line, int author_id);
-
-// Function to clean up temporary files and memory
+/**
+ * Clean up any resources used by git operations
+ */
 void cleanup_git_data();
 
 #endif
