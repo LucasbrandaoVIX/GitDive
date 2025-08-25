@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "commit.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "xstring": "c",
+        "xutility": "c",
+        "binary_tree.h": "c",
+        "binary_search_tree.h": "c"
     }
 }
