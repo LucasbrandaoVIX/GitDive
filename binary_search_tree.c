@@ -42,7 +42,7 @@ TreeNode* insert_bst(TreeNode* tree, void* data, int (*compare)(void* a, void* b
     return tree;
 }
 
-void print_bst(TreeNode* tree, void (*print_function)(void* data), int depth){
+void print_btree(TreeNode* tree, void (*print_function)(void* data), int depth){
     
     if(tree == NULL){
         return;
