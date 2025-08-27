@@ -3,6 +3,7 @@
 #include "list.h"
 #include "commit.h"
 #include "git_local.h"
+#include "binary_search_tree.h"
 
 int main(){
     printf("GitDive - Real Git Repository Analysis\n");
@@ -38,6 +39,9 @@ int main(){
     print_list(commit_list, (void (*)(void*))print_commit);
     printf("=========================================\n");
     
+    TreeNode* timestamp_tree = NULL;
+
+
     // Clean up
     cleanup_git_data();
     

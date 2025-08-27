@@ -72,3 +72,7 @@ void* traverse_list(List* list, void* (*callback_function)(void*)){
     return NULL;
 }
 
+int get_number_of_items(List* list){
+
+    return list->items_num;
+}

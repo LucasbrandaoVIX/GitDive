@@ -155,3 +155,45 @@ TreeNode* delete_node(TreeNode* tree, void* data, int (*compare)(void* a, void* 
     return tree;
 }
 
+int tree_height(TreeNode* tree){
+    if(tree == NULL){
+        return -1;  // Height of empty tree is -1
+    }
+    
+    int left_height = tree_height(tree->left);
+    int right_height = tree_height(tree->right);
+    
+    int max_height;
+    if(left_height > right_height){
+        max_height = left_height;
+    } else {
+        max_height = right_height;
+    }
+    
+    return 1 + max_height;
+}
+
+int tree_size(TreeNode* tree){
+    if(tree == NULL){
+        return 0;
+    }
+    
+    return 1 + tree_size(tree->left) + tree_size(tree->right);
+}
+
+// Create a single node (alias for initialize_tree for consistency with header)
+TreeNode* create_node(void* data){
+    return initialize_tree(data);
+}
+
+// Find maximum node in tree (rightmost)
+TreeNode* find_max(TreeNode* tree){
+    if(tree == NULL){
+        return NULL;
+    }
+    
+    while(tree->right != NULL){
+        tree = tree->right;
+    }
+    return tree;
+}

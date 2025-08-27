@@ -4,5 +4,6 @@
 
 int main (){
 
+    TreeNode* tree = create_node()
     return 0;
 }

@@ -89,3 +89,11 @@ void print_commit(Commit* commit){
     
     printf("=====================\n\n");
 }
+
+// Simple comparator exposed via commit.h
+int compare_commits(void* a, void* b){
+    if (a == NULL || b == NULL) return 0;
+    Commit* A = (Commit*)a;
+    Commit* B = (Commit*)b;
+    return (A->id - B->id);
+}

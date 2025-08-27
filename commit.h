@@ -12,4 +12,7 @@ Author* initialize_author(int author_id, char* name);
 void print_mod(Modification* mod);
 void print_commit(Commit* commit);
 
+// Comparator for commits (returns <0 if a<b, 0 if equal, >0 if a>b)
+int compare_commits(void* a, void* b);
+
 #endif

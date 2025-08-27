@@ -1,5 +1,5 @@
-#ifndef BINARY_TREE
-#define BINARY_TREE
+#ifndef BINARY_SEARCH_TREE
+#define BINARY_SEARCH_TREE
 
 typedef struct TreeNode TreeNode;
 
