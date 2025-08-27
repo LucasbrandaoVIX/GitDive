@@ -8,6 +8,7 @@ struct Commit{
     Author* author;
     char message[256];
     List* modifications;
+    long long timestamp; // unix epoch seconds
 };
 
 struct Author{
@@ -25,13 +26,14 @@ struct Modification {
     int start_line;   
 };
 
-Commit* initialize_commit(int commit_id, Author* author, List* modifications, char* message){
+Commit* initialize_commit(int commit_id, Author* author, List* modifications, char* message, long long timestamp){
     Commit* commit = malloc(sizeof(Commit));
     if (!commit) return NULL;
     commit->id = commit_id;
     commit->author = author;
     strcpy(commit->message, message);
     commit->modifications = modifications;
+    commit->timestamp = timestamp;
     return commit;
 }
 
@@ -61,12 +63,13 @@ void print_mod(Modification* mod){
         return;
     }
     
-    printf("=== Modification Details ===\n");
-    printf("File Path: %s\n", mod->filepath);
-    printf("Start Line: %d\n", mod->start_line);
-    printf("Old Code: %s\n", mod->old_code);
-    printf("New Code: %s\n", mod->new_code);
-    printf("============================\n");
+    // Count lines changed without printing code content
+    int removed_lines = 0;
+    for (const char* p = mod->old_code; *p; ++p) if (*p == '\n') removed_lines++;
+    int added_lines = 0;
+    for (const char* p = mod->new_code; *p; ++p) if (*p == '\n') added_lines++;
+
+    printf("- %s (start: %d, -%d +%d)\n", mod->filepath, mod->start_line, removed_lines, added_lines);
 }
 
 void print_commit(Commit* commit){
@@ -77,15 +80,11 @@ void print_commit(Commit* commit){
     
     printf("\n======= COMMIT =======\n");
     printf("Commit ID: %d\n", commit->id);
+    printf("Timestamp: %lld\n", commit->timestamp);
     printf("Author: %s (ID: %d)\n", commit->author->name, commit->author->author_id);
     printf("Message: %s\n", commit->message);
-    printf("Modifications:\n");
-    
-    if (commit->modifications != NULL) {
-        print_list(commit->modifications, (void (*)(void*))print_mod);
-    } else {
-        printf("No modifications\n");
-    }
+    int mod_count = commit->modifications ? get_number_of_items(commit->modifications) : 0;
+    printf("Files changed: %d\n", mod_count);
     
     printf("=====================\n\n");
 }
@@ -96,4 +95,29 @@ int compare_commits(void* a, void* b){
     Commit* A = (Commit*)a;
     Commit* B = (Commit*)b;
     return (A->id - B->id);
+}
+
+int compare_commits_by_timestamp(void* a, void* b){
+    if (a == NULL || b == NULL) return 0;
+    Commit* A = (Commit*)a;
+    Commit* B = (Commit*)b;
+    if (A->timestamp < B->timestamp) return -1;
+    if (A->timestamp > B->timestamp) return 1;
+    return 0;
+}
+
+long long get_commit_timestamp(Commit* commit){
+    if (!commit) return 0;
+    return commit->timestamp;
+}
+
+// Compact single-line printer for tree output (matches print_btree's inline style)
+void print_commit_for_tree(void* data){
+    Commit* c = (Commit*)data;
+    if (!c) {
+        printf("(null)");
+        return;
+    }
+    // No trailing newline; print_btree handles layout/newlines
+    printf("id=%d ts=%lld | %s | %s", c->id, c->timestamp, c->author->name, c->message);
 }

@@ -76,3 +76,15 @@ int get_number_of_items(List* list){
 
     return list->items_num;
 }
+
+void* traverse_list_with_context(List* list, void* (*callback_function)(void*, void*), void* context){
+    Node* node = list->first;
+    while (node != NULL){
+        void* v = callback_function(node->data, context);
+        if(v){
+            return v;
+        }
+        node = node->next;
+    }
+    return NULL;
+}

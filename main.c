@@ -5,6 +5,15 @@
 #include "git_local.h"
 #include "binary_search_tree.h"
 
+// Callback used to insert each commit into the BST when traversing the list.
+// - item: pointer to a Commit
+// - ctx: pointer to TreeNode* (i.e., &timestamp_tree), so we can update the root as we insert
+static void* insert_commit_to_bst(void* item, void* ctx){
+    TreeNode** tree_ref = (TreeNode**)ctx;
+    *tree_ref = insert_bst(*tree_ref, item, compare_commits_by_timestamp);
+    return NULL; // return non-NULL to stop traversal early (not used here)
+}
+
 int main(){
     printf("GitDive - Real Git Repository Analysis\n");
     printf("======================================\n\n");
@@ -39,10 +48,22 @@ int main(){
     print_list(commit_list, (void (*)(void*))print_commit);
     printf("=========================================\n");
     
+    // Build a BST of commits ordered by timestamp (older on the left)
     TreeNode* timestamp_tree = NULL;
+    if (commit_list && get_number_of_items(commit_list) > 0) {
+        // Insert each commit pointer into the BST using the timestamp comparator
+        traverse_list_with_context(commit_list, insert_commit_to_bst, &timestamp_tree);
+
+    printf("\n========== COMMITS BST (by timestamp) =========\n");
+    print_btree(timestamp_tree, print_commit_for_tree, 0);
+        printf("===============================================\n");
+    }
 
 
     // Clean up
+    // Free the BST nodes (commit objects are owned by the list for now)
+    free_tree(timestamp_tree);
+
     cleanup_git_data();
     
     return 0;

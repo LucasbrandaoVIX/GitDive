@@ -197,20 +197,26 @@ List* get_git_commits(int max_commits) {
         char hash[MAX_COMMIT_HASH_LENGTH];
         char author_name[128];
         char message[256];
-        char date[64];
+    char date[64];
         
         // Parse the commit line
         parse_commit_line(line, hash, author_name, message, date);
         
-        // Create author
+    // Create author
         Author* author = initialize_author(commit_id, author_name);
         if (!author) continue;
         
         // Get modifications for this commit
         List* modifications = get_commit_diff(hash);
         
-        // Create commit
-        Commit* commit = initialize_commit(commit_id, author, modifications, message);
+        // Parse UNIX timestamp from date field (git log %at gives epoch seconds)
+        long long timestamp = 0;
+        if (strlen(date) > 0) {
+            timestamp = atoll(date);
+        }
+
+        // Create commit including timestamp
+        Commit* commit = initialize_commit(commit_id, author, modifications, message, timestamp);
         if (commit) {
             insert_item(commit_list, commit);
             commit_id++;
