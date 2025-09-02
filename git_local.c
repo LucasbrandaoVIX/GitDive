@@ -5,6 +5,8 @@
 #include <ctype.h>
 
 #ifdef _WIN32
+#include <io.h>
+#include <process.h>
 #define popen _popen
 #define pclose _pclose
 #endif
@@ -60,11 +62,26 @@ static void parse_commit_line(char* line, char* hash, char* author_name, char* m
 static List* parse_diff_output(FILE* fp) {
     List* modifications = initialize_list();
     char line[MAX_LINE_LENGTH];
-    char current_file[256] = "";
-    char old_code[1024] = "";
-    char new_code[1024] = "";
+    char* current_file = NULL;
+    char* old_code = NULL;
+    char* new_code = NULL;
+    size_t old_code_len = 0;
+    size_t new_code_len = 0;
+    size_t old_code_capacity = 1024;
+    size_t new_code_capacity = 1024;
     int start_line = 0;
     int in_hunk = 0;
+    
+    // Initialize dynamic strings
+    old_code = malloc(old_code_capacity);
+    new_code = malloc(new_code_capacity);
+    if (!old_code || !new_code) {
+        free(old_code);
+        free(new_code);
+        return modifications;
+    }
+    old_code[0] = '\0';
+    new_code[0] = '\0';
     
     while (fgets(line, sizeof(line), fp)) {
         // Remove newline
@@ -72,14 +89,16 @@ static List* parse_diff_output(FILE* fp) {
         
         if (strncmp(line, "diff --git", 10) == 0) {
             // Save previous modification if exists
-            if (strlen(current_file) > 0 && (strlen(old_code) > 0 || strlen(new_code) > 0)) {
+            if (current_file && (old_code_len > 0 || new_code_len > 0)) {
                 Modification* mod = initialize_modification(current_file, old_code, new_code, start_line);
                 if (mod) insert_item(modifications, mod);
             }
             
             // Reset for new file
-            strcpy(old_code, "");
-            strcpy(new_code, "");
+            old_code[0] = '\0';
+            new_code[0] = '\0';
+            old_code_len = 0;
+            new_code_len = 0;
             start_line = 0;
             in_hunk = 0;
             
@@ -87,7 +106,11 @@ static List* parse_diff_output(FILE* fp) {
             char* space = strchr(line + 11, ' ');
             if (space) {
                 char* filename = space + 3; // Skip " b/"
-                strcpy(current_file, filename);
+                free(current_file); // Free previous filename
+                current_file = malloc(strlen(filename) + 1);
+                if (current_file) {
+                    strcpy(current_file, filename);
+                }
             }
         }
         else if (strncmp(line, "@@", 2) == 0) {
@@ -100,27 +123,50 @@ static List* parse_diff_output(FILE* fp) {
         }
         else if (in_hunk) {
             if (line[0] == '-' && line[1] != '-') {
-                // Removed line
-                if (strlen(old_code) < 900) {
-                    strcat(old_code, line + 1);
-                    strcat(old_code, "\n");
+                // Removed line - add to old_code
+                size_t line_len = strlen(line + 1) + 1; // +1 for newline
+                if (old_code_len + line_len + 1 >= old_code_capacity) {
+                    old_code_capacity *= 2;
+                    char* temp = realloc(old_code, old_code_capacity);
+                    if (temp) {
+                        old_code = temp;
+                    } else {
+                        continue; // Skip if realloc fails
+                    }
                 }
+                strcat(old_code, line + 1);
+                strcat(old_code, "\n");
+                old_code_len += line_len;
             }
             else if (line[0] == '+' && line[1] != '+') {
-                // Added line
-                if (strlen(new_code) < 900) {
-                    strcat(new_code, line + 1);
-                    strcat(new_code, "\n");
+                // Added line - add to new_code
+                size_t line_len = strlen(line + 1) + 1; // +1 for newline
+                if (new_code_len + line_len + 1 >= new_code_capacity) {
+                    new_code_capacity *= 2;
+                    char* temp = realloc(new_code, new_code_capacity);
+                    if (temp) {
+                        new_code = temp;
+                    } else {
+                        continue; // Skip if realloc fails
+                    }
                 }
+                strcat(new_code, line + 1);
+                strcat(new_code, "\n");
+                new_code_len += line_len;
             }
         }
     }
     
     // Save last modification
-    if (strlen(current_file) > 0 && (strlen(old_code) > 0 || strlen(new_code) > 0)) {
+    if (current_file && (old_code_len > 0 || new_code_len > 0)) {
         Modification* mod = initialize_modification(current_file, old_code, new_code, start_line);
         if (mod) insert_item(modifications, mod);
     }
+    
+    // Cleanup
+    free(current_file);
+    free(old_code);
+    free(new_code);
     
     return modifications;
 }
@@ -194,17 +240,28 @@ List* get_git_commits(int max_commits) {
         
         if (strlen(line) == 0) continue;
         
+        // Use dynamic allocation for parsing variables
         char hash[MAX_COMMIT_HASH_LENGTH];
-        char author_name[128];
-        char message[256];
-    char date[64];
+        char* author_name = malloc(256);
+        char* message = malloc(512);
+        char date[64];
+        
+        if (!author_name || !message) {
+            free(author_name);
+            free(message);
+            continue;
+        }
         
         // Parse the commit line
         parse_commit_line(line, hash, author_name, message, date);
         
-    // Create author
+        // Create author
         Author* author = initialize_author(commit_id, author_name);
-        if (!author) continue;
+        if (!author) {
+            free(author_name);
+            free(message);
+            continue;
+        }
         
         // Get modifications for this commit
         List* modifications = get_commit_diff(hash);
@@ -221,6 +278,10 @@ List* get_git_commits(int max_commits) {
             insert_item(commit_list, commit);
             commit_id++;
         }
+        
+        // Free temporary strings (the data is now copied into the structures)
+        free(author_name);
+        free(message);
     }
     
     close_git_command(fp);

@@ -24,4 +24,9 @@ int compare_commits_by_timestamp(void* a, void* b);
 // Optional: accessor for commit timestamp (useful for tests or other modules)
 long long get_commit_timestamp(Commit* commit);
 
+// Cleanup functions to free dynamically allocated memory
+void free_author(Author* author);
+void free_modification(Modification* mod);
+void free_commit(Commit* commit);
+
 #endif

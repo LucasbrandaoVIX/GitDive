@@ -26,10 +26,17 @@ int main(){
     }
     
     // Get repository root path
-    char repo_path[512];
-    if (get_git_root(repo_path, sizeof(repo_path))) {
+    char* repo_path = malloc(1024); // Allocate dynamic buffer
+    if (!repo_path) {
+        printf("Error: Memory allocation failed\n");
+        return 1;
+    }
+    
+    if (get_git_root(repo_path, 1024)) {
         printf("Repository root: %s\n\n", repo_path);
     }
+    
+    free(repo_path); // Free the allocated buffer
     
     // Get real commits from the local git repository
     printf("Fetching commits from local git repository...\n");
