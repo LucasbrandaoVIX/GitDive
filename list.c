@@ -1,14 +1,7 @@
 #include <stdlib.h>
 #include "list.h"
 
-typedef struct Node{
-    struct Node* previous;
-    struct Node* next;
-    void* data;
-}Node;
-
 struct List{
-
     Node* first;
     Node* last;
     int items_num;
@@ -87,4 +80,49 @@ void* traverse_list_with_context(List* list, void* (*callback_function)(void*, v
         node = node->next;
     }
     return NULL;
+}
+
+// Alias for initialize_list
+List* create_list() {
+    return initialize_list();
+}
+
+// Node navigation functions
+Node* get_first_node(List* list) {
+    if (!list) return NULL;
+    return list->first;
+}
+
+Node* get_last_node(List* list) {
+    if (!list) return NULL;
+    return list->last;
+}
+
+Node* get_next_node(Node* node) {
+    if (!node) return NULL;
+    return node->next;
+}
+
+Node* get_previous_node(Node* node) {
+    if (!node) return NULL;
+    return node->previous;
+}
+
+void* get_node_data(Node* node) {
+    if (!node) return NULL;
+    return node->data;
+}
+
+// Cleanup function
+void free_list(List* list) {
+    if (!list) return;
+    
+    Node* current = list->first;
+    while (current) {
+        Node* next = current->next;
+        free(current);
+        current = next;
+    }
+    
+    free(list);
 }

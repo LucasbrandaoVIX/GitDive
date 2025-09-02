@@ -21,8 +21,22 @@ int compare_commits(void* a, void* b);
 // Comparator for commits by timestamp (older first)
 int compare_commits_by_timestamp(void* a, void* b);
 
-// Optional: accessor for commit timestamp (useful for tests or other modules)
+// Accessor functions for commit data
 long long get_commit_timestamp(Commit* commit);
+char* get_commit_message(Commit* commit);
+List* get_commit_modifications(Commit* commit);
+Author* get_commit_author(Commit* commit);
+int get_commit_id(Commit* commit);
+
+// Accessor functions for modification data
+char* get_modification_filepath(Modification* mod);
+char* get_modification_old_code(Modification* mod);
+char* get_modification_new_code(Modification* mod);
+int get_modification_start_line(Modification* mod);
+
+// Accessor functions for author data
+char* get_author_name(Author* author);
+int get_author_id(Author* author);
 
 // Cleanup functions to free dynamically allocated memory
 void free_author(Author* author);

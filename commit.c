@@ -171,6 +171,59 @@ long long get_commit_timestamp(Commit* commit){
     return commit->timestamp;
 }
 
+// Accessor functions for commit data
+char* get_commit_message(Commit* commit) {
+    if (!commit) return NULL;
+    return commit->message;
+}
+
+List* get_commit_modifications(Commit* commit) {
+    if (!commit) return NULL;
+    return commit->modifications;
+}
+
+Author* get_commit_author(Commit* commit) {
+    if (!commit) return NULL;
+    return commit->author;
+}
+
+int get_commit_id(Commit* commit) {
+    if (!commit) return -1;
+    return commit->id;
+}
+
+// Accessor functions for modification data
+char* get_modification_filepath(Modification* mod) {
+    if (!mod) return NULL;
+    return mod->filepath;
+}
+
+char* get_modification_old_code(Modification* mod) {
+    if (!mod) return NULL;
+    return mod->old_code;
+}
+
+char* get_modification_new_code(Modification* mod) {
+    if (!mod) return NULL;
+    return mod->new_code;
+}
+
+int get_modification_start_line(Modification* mod) {
+    if (!mod) return -1;
+    return mod->start_line;
+}
+
+// Accessor functions for author data
+char* get_author_name(Author* author) {
+    if (!author) return NULL;
+    return author->name;
+}
+
+int get_author_id(Author* author) {
+    if (!author) return -1;
+    return author->author_id;
+}
+
 // Compact single-line printer for tree output (matches print_btree's inline style)
 void print_commit_for_tree(void* data){
     Commit* c = (Commit*)data;

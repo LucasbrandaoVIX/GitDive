@@ -18,6 +18,27 @@
 				"binary_search_tree.c"
 			],
 			"group": "build"
+		},
+		{
+			"label": "build-gitdive-complete",
+			"type": "shell",
+			"command": "gcc",
+			"args": [
+				"-Wall",
+				"-Wextra",
+				"-std=c11",
+				"-o",
+				"gitdive.exe",
+				"main.c",
+				"commit.c",
+				"list.c",
+				"git_local.c",
+				"binary_search_tree.c",
+				"semantic_fingerprint.c",
+				"commit_similarity_tree.c",
+				"-lm"
+			],
+			"group": "build"
 		}
 	]
 }
